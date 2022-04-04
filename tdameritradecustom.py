@@ -16,6 +16,7 @@
 
 """Implements TD Ameritrade with a tweak that returns Security column directly.
 Also allows various for date acquired
+always box c not reported
 
 TD Ameritrade gain/loss output provides already-reconciled transactions, i.e.,
 each buy/sell pair comes in a single record, on a single line.
@@ -41,7 +42,7 @@ FIRST_LINE = ','.join([
 TRANSACTION_TYPE = 'Trans type'
 
 
-class TDAmeritrade2:
+class TDAmeritradeCustom:
     @classmethod
     def name(cls):
         return "TD Ameritrade"
@@ -123,12 +124,14 @@ class TDAmeritrade2:
             curr_txn.saleProceeds = cls.saleProceeds(txn_dict)
 
             assert curr_txn.buyDate == "Various" or curr_txn.sellDate >= curr_txn.buyDate
+
+            #https://taxdataexchange.org/docs/txf/v042/form-1099-b.html
             if cls.isShortTerm(txn_dict):
                 # TODO(mbrukman): assert here that (sellDate - buyDate) <= 1 year
-                curr_txn.entryCode = 321  # "ST gain/loss - security"
+                curr_txn.entryCode = 712  # "ST gain/loss - security"
             else:
                 # TODO(mbrukman): assert here that (sellDate - buyDate) > 1 year
-                curr_txn.entryCode = 323  # "LT gain/loss - security"
+                curr_txn.entryCode = 714  # "LT gain/loss - security"
 
             if tax_year and curr_txn.sellDate.year != tax_year:
                 utils.Warning('ignoring txn: "%s" (line %d) as the sale is not from %d\n' %

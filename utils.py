@@ -68,6 +68,8 @@ class Transaction(object):
 
 
 def txfDate(date):
+    if(date == "Various"):
+        return "Various"
     """Returns a date string in the TXF format, which is MM/DD/YYYY."""
     return date.strftime('%m/%d/%Y')
 
